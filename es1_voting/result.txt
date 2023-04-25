@@ -1,0 +1,34 @@
+1) many transactions are needed to assign the rights to vote to all participants:
+	we can create a function " getVoteRights() "
+	this function should be called from an end-user,
+	to prevent bot entering the ballot we can add some
+	security to checks if it's a real person or anyway a
+	real entity, not a bot.
+	In this way the gas fees will be payed by the end-user, 
+	no transaction needed from the owner.
+	The function would also check that msg.sender dind't vote 
+	already, neither have already rights vote.
+	If all checks are satisfied 
+		voters[voter].weight = 1;
+	
+	You may think, what happen if entity A delegate his vote to
+	entity B? B would get his weight = 1 so he can't claim 
+	successfully getVoteRights().
+	To fix this issue, we have to modify the Voter struct in this way:
+	    struct Voter {
+	        uint delegateWeight; // weight is accumulated by delegation
+			bool isAbleToVote; // if true, that person have the right to vote/delegate
+	        bool voted;  // if true, that person already voted
+	        address delegate; // person delegated to
+	        uint vote;   // index of the voted proposal
+	    }
+	So the total weight of a Voter is calculated in the following way:
+		uint totWeight = 0;
+		uint rightToVote = 0;
+		if (entity.isAbleToVote) {rightToVote=1;}
+		totWeight = (entity.delegateWeight + 1) * rightToVote;
+
+2) if two or more proposals have the same number of votes, winningProposal() is not able to register a tie
+	In my opinion, this is more kind of a consensus problem therefore i would simply return the list
+	of the winners proposals
+
