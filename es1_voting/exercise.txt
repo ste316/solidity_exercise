@@ -2,3 +2,8 @@ Currently, many transactions are needed to assign the rights to vote to all part
 Moreover, if two or more proposals have the same number of votes, 
 winningProposal() is not able to register a tie. 
 Can you think of a way to fix these issues?
+
+Exercise refences:
+  https://docs.soliditylang.org/en/v0.8.19/solidity-by-example.html#voting
+  https://docs.soliditylang.org/en/v0.8.19/solidity-by-example.html#possible-improvements
+  
