@@ -1,14 +1,14 @@
 1) many transactions are needed to assign the rights to vote to all participants:
 	we can create a function " getVoteRights() "
 	this function should be called from an end-user,
-	to prevent bot entering the ballot we can add some
-	security to checks if it's a real entity, not a bot.
-	In this way the gas fees will be payed by the end-user, 
+	in this way the gas fees will be payed by the end-user, 
 	no transaction needed from the owner.
+	To prevent bot entering the ballot we can add some
+	security to checks if it's a real entity, not a bot.
 	The function would also check that msg.sender dind't vote 
 	already, neither have already rights vote.
 	If all checks are satisfied 
-		voters[voter].weight = 1;
+		voters[voter].isAbleToVote = true;
 	
 	You may think, what happen if entity A delegate his vote to
 	entity B? B would get his weight >= 1 so he can't claim 
@@ -16,7 +16,7 @@
 	To fix this issue, we have to modify the Voter struct in this way:
 	    struct Voter {
 	        uint delegateWeight; // weight is accumulated by delegation
-		bool isAbleToVote; // if true, that person have the right to vote/delegate
+			bool isAbleToVote; // if true, that person have the right to vote/delegate
 	        bool voted;  // if true, that person already voted
 	        address delegate; // person delegated to
 	        uint vote;   // index of the voted proposal
