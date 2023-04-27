@@ -7,7 +7,7 @@ contract Ballot {
     // It will represent a single voter.
 	    struct Voter {
 	        uint delegateWeight; // weight is accumulated by delegation
-		    bool isAbleToVote; // if true, that person have the right to vote/delegate
+		bool isAbleToVote; // if true, that person have the right to vote/delegate
 	        bool voted;  // if true, that person already voted
 	        address delegate; // person delegated to
 	        uint vote;   // index of the voted proposal
@@ -31,7 +31,7 @@ contract Ballot {
 
     /// Create a new ballot to choose one of `proposalNames`.
     constructor(bytes32[] memory proposalNames) {
-        // ARGUMENT TO TET THE DEPLOY ["0x1000000000000000000000000000000000000000000000000000000000000000", "0x2000000000000000000000000000000000000000000000000000000000000000"]
+        // TEST ARGUMENT TO DEPLOY THE CONTRACT USING REMIX ["0x1000000000000000000000000000000000000000000000000000000000000000", "0x2000000000000000000000000000000000000000000000000000000000000000"]
         chairperson = msg.sender;
         voters[chairperson].isAbleToVote = true;
 
