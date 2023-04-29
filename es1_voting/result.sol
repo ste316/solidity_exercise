@@ -5,19 +5,24 @@ contract Ballot {
     // This declares a new complex type which will
     // be used for variables later.
     // It will represent a single voter.
-	    struct Voter {
-	        uint delegateWeight; // weight is accumulated by delegation
-		    bool isAbleToVote; // if true, that person have the right to vote/delegate
-	        bool voted;  // if true, that person already voted
-	        address delegate; // person delegated to
-	        uint vote;   // index of the voted proposal
-	    }
+    struct Voter {
+        uint delegateWeight; // weight is accumulated by delegation
+        bool isAbleToVote; // if true, that person have the right to vote/delegate
+        bool voted;  // if true, that person already voted
+        address delegate; // person delegated to
+        uint vote;   // index of the voted proposal
+    }
 
     // This is a type for a single proposal.
     struct Proposal {
         bytes32 name;   // short name (up to 32 bytes)
         uint voteCount; // number of accumulated votes
     }
+
+    event GotVoteRights(address voter);
+    event NewVote(address voter, uint proposalIndex);
+    event NewDelegate(address delegator, address delegate);
+    event EndOfBallot(bytes32[] winningProposals);
 
     address public chairperson;
     bytes32[] winningProposals;
@@ -31,7 +36,7 @@ contract Ballot {
 
     /// Create a new ballot to choose one of `proposalNames`.
     constructor(bytes32[] memory proposalNames) {
-        // ARGUMENT TO TET THE DEPLOY ["0x1000000000000000000000000000000000000000000000000000000000000000", "0x2000000000000000000000000000000000000000000000000000000000000000"]
+        // ARGUMENT TO TEST THE DEPLOY ["0x1000000000000000000000000000000000000000000000000000000000000000", "0x2000000000000000000000000000000000000000000000000000000000000000"]
         chairperson = msg.sender;
         voters[chairperson].isAbleToVote = true;
 
@@ -50,12 +55,13 @@ contract Ballot {
     }
 
     function getVoteRights() external {
-        require(msg.sender != chairperson, "You are Chirperson, you already have rights to vote");
+        require(msg.sender != chairperson, "You are Chairperson, you already have rights to vote");
         // require that msg.sender dind't vote, otherwise revert the transaction
         require(!voters[msg.sender].voted, "You have already voted");
         require(!voters[msg.sender].isAbleToVote, "You already got rights vote");
 
         voters[msg.sender].isAbleToVote = true;
+        emit GotVoteRights(msg.sender);
     }
 
     /// Delegate your vote to the voter `to`.
@@ -95,11 +101,14 @@ contract Ballot {
         if (delegate_.voted) {
             // If the delegate already voted,
             // directly add to the number of votes
-            proposals[delegate_.vote].voteCount += calcSenderVotingWeight() ;
+            proposals[delegate_.vote].voteCount += calcSenderVotingWeight();
+            emit NewDelegate(msg.sender, to);
+            emit NewVote(to, voters[to].vote);
         } else {
             // If the delegate did not vote yet,
             // add to her weight.
             delegate_.delegateWeight += calcSenderVotingWeight();
+            emit NewDelegate(msg.sender, to);
         }
     }
 
@@ -123,12 +132,13 @@ contract Ballot {
         // this will throw automatically and revert all
         // changes.
         proposals[proposal].voteCount += calcSenderVotingWeight();
+        emit NewVote(msg.sender, proposal);
     }
 
     /// @dev Computes the winning proposal taking all
     /// previous votes into account.
     function getWinningProposal() public {
-        // TODO add event to print winning proposals
+        require(msg.sender == chairperson, "You can't terminate the ballot, you're not the chairperson");
         uint winningVoteCount = 0;
         for (uint p = 0; p < proposals.length; p++) {
             if (proposals[p].voteCount >= winningVoteCount) {
@@ -140,6 +150,7 @@ contract Ballot {
                 winningProposals.push(proposals[p].name);
             }
         }
+        emit EndOfBallot(winningProposals);
     }
 
 }
